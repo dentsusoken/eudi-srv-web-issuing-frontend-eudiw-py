@@ -5,8 +5,7 @@ services:
       - "6007:5000"
     volumes:
       - /tmp/issuer_frontend/log_dev:/tmp/issuer_frontend/log_dev
-    env_file:
-      - .env
+      - /etc/issuer_config/frontend_config.yaml:/etc/issuer_config/frontend_config.yaml:ro
     restart: unless-stopped
     profiles: ["base"]
 
