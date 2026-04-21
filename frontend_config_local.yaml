@@ -5,6 +5,4 @@ backend_url: "https://localhost:5001"
 oauth_url: "https://localhost:6005"
 internal_oauth_url: "https://issuer_oidc_local:5000"
 internal_backend_url: "https://issuer_backend_local:5000"
-credentials_supported:
-  - "eu.europa.ec.eudi.pid_mdoc"
-  - "eu.europa.ec.eudi.mdl_mdoc"
+credentials_supported: "*"
