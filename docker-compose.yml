@@ -10,11 +10,14 @@ services:
     profiles: ["base"]
 
   issuer_frontend_local:
-    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py:latest
+    build: .
     command: flask run --host=0.0.0.0 --cert=/certs/tls/localhost+2.pem --key=/certs/tls/localhost+2-key.pem
     ports:
       - "6007:5000"
     volumes:
+      - ./frontend_config_local.yaml:/etc/issuer_config/frontend_config.yaml:ro
+      - ./app/__init__local.py:/app/app/__init__.py:ro
+      - ./app/auth_redirect_local.py:/app/app/auth_redirect.py:ro
       - ../eudi-srv-issuer-oidc-py/script/certs/tls/localhost+2.pem:/certs/tls/localhost+2.pem:ro
       - ../eudi-srv-issuer-oidc-py/script/certs/tls/localhost+2-key.pem:/certs/tls/localhost+2-key.pem:ro
       - /tmp/issuer_frontend/log_dev:/tmp/issuer_frontend/log_dev

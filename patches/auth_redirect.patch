@@ -1,0 +1,28 @@
+diff --git a/app/auth_redirect.py b/app/auth_redirect.py
+index b11f506..9b72807 100644
+--- a/app/auth_redirect.py
++++ b/app/auth_redirect.py
+@@ -30,18 +30,22 @@ def pushed_authorization():
+ 
+         body["frontend_id"] = CONFIGURATION['frontend_id']
+ 
++        internal_oauth_url = CONFIGURATION.get('internal_oauth_url', CONFIGURATION['oauth_url'])
++
+         forward_headers = {
+             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+             "Accept": "application/json,application/json",
+             "Accept-Charset": "UTF-8",
+             "User-Agent": request.headers.get("User-Agent", "proxy-service"),
++            "Host": "localhost:5000",
+         }
+ 
+         response = requests.post(
+-            f"{CONFIGURATION['oauth_url']}/pushed_authorization",
++            f"{internal_oauth_url}/pushed_authorization",
+             data=body,  # Send as form data
+             headers=forward_headers,
+             timeout=30,
++            verify=False,
+         )
+ 
+         return response.content, response.status_code, response.headers.items()

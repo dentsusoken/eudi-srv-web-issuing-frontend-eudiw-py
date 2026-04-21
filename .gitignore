@@ -1,4 +1,5 @@
 # Local
+app/*_local.py
 app/keys
 app/certs/PID-DS-0001_CZ.pem
 app/certs/PID-DS-0001_EE.pem
