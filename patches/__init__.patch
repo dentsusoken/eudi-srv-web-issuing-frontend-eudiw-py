@@ -1,0 +1,85 @@
+diff --git a/app/__init__.py b/app/__init__.py
+index 0fbd6d8..338f26e 100644
+--- a/app/__init__.py
++++ b/app/__init__.py
+@@ -204,10 +204,13 @@ def setup_metadata():
+             oidc_metadata = json.load(metadata)
+             oidc_metadata_clean = copy.deepcopy(oidc_metadata)
+ 
+-        metadata_endpoint = f"{CONFIGURATION['backend_url']}/.well-known/openid-credential-issuer"
++        internal_backend_url = CONFIGURATION.get('internal_backend_url', CONFIGURATION['backend_url'])
++        metadata_endpoint = f"{internal_backend_url}/.well-known/openid-credential-issuer"
++
++        credential_request_encryption = None
+ 
+         try:
+-            response = requests.get(metadata_endpoint)
++            response = requests.get(metadata_endpoint, verify=False)
+             response.raise_for_status()
+ 
+             data = response.json()
+@@ -263,17 +266,17 @@ def setup_metadata():
+ 
+     oidc_domain = CONFIGURATION['oauth_url']
+ 
+-    openid_metadata = cast(
+-        Dict[str, Any], replace_domain(openid_metadata, f"{old_domain}/oidc", oidc_domain)
+-    )
++    new_openid = cast(Dict[str, Any], replace_domain(openid_metadata, f"{old_domain}/oidc", oidc_domain))
++    openid_metadata.clear()
++    openid_metadata.update(new_openid)
+ 
+-    oauth_metadata = cast(
+-        Dict[str, Any], replace_domain(oauth_metadata, old_domain, new_domain)
+-    )
+-    
+-    oidc_metadata = cast(
+-        Dict[str, Any], replace_domain(oidc_metadata, old_domain, new_domain)
+-    )
++    new_oauth = cast(Dict[str, Any], replace_domain(oauth_metadata, old_domain, new_domain))
++    oauth_metadata.clear()
++    oauth_metadata.update(new_oauth)
++
++    new_oidc = cast(Dict[str, Any], replace_domain(oidc_metadata, old_domain, new_domain))
++    oidc_metadata.clear()
++    oidc_metadata.update(new_oidc)
+ 
+ 
+     openid_metadata["issuer"] = CONFIGURATION['service_url']
+@@ -282,21 +285,24 @@ def setup_metadata():
+     oidc_metadata["display"][0]["logo"]["uri"] = f"{CONFIGURATION['service_url']}/ic-logo.png"
+ 
+ 
+-    metadata_signing_endpoint = f"{CONFIGURATION['backend_url']}/metadata/metadata_signer"
+-    
++    internal_backend_url = CONFIGURATION.get('internal_backend_url', CONFIGURATION['backend_url'])
++    metadata_signing_endpoint = f"{internal_backend_url}/metadata/metadata_signer"
++
+     payload = {
+     "metadata": oidc_metadata,
+     "issuer_frontend_id": CONFIGURATION['frontend_id'],
+     "iss": CONFIGURATION['service_url']
+     }
+ 
+-    response = requests.post(
+-        metadata_signing_endpoint,
+-        json=payload,
+-        headers={"Content-Type": "application/json"},
+-        timeout=10,
+-    )
+-
+-    response.raise_for_status()
+-
+-    signed_metadata = response.json()["signed_metadata"]
++    try:
++        response = requests.post(
++            metadata_signing_endpoint,
++            json=payload,
++            headers={"Content-Type": "application/json"},
++            timeout=10,
++            verify=False,
++        )
++        response.raise_for_status()
++        signed_metadata = response.json()["signed_metadata"]
++    except Exception as e:
++        logger.warning("metadata_signer unavailable, signed_metadata will not be set: %s", e)

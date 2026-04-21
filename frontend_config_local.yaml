@@ -1,0 +1,8 @@
+service_url: "https://localhost:6007"
+log_dir: "/tmp/issuer_frontend/log_dev/logs.log"
+frontend_id: "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
+backend_url: "https://localhost:5001"
+oauth_url: "https://localhost:6005"
+internal_oauth_url: "https://issuer_oidc_local:5000"
+internal_backend_url: "https://issuer_backend_local:5000"
+credentials_supported: "*"
