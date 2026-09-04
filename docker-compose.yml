@@ -25,3 +25,6 @@ services:
       - .env.local
     restart: unless-stopped
     profiles: ["local"]
+    depends_on:
+      issuer_backend_local:
+        condition: service_healthy
